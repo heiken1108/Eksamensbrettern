@@ -1,26 +1,22 @@
 import Head from 'next/head'
 import clientPromise from '../../lib/mongodb'
-import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import type {InferGetStaticPropsType } from 'next'
 
-export async function getServerSideProps() {
-  try {
-    const client = await clientPromise;
-    const db = client.db("Test"); //Selve Databasen
-    const svar = await db.collection("Testdatabase").find().toArray();
-
-    return {
-      props: {testSvar: JSON.parse(JSON.stringify(svar))},
-    };
-
-  } catch (error) {
-    
-  }
+type task = {
+  _id: string
+  name: string
 }
 
-export default function Home({ testSvar }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export async function getStaticProps() {
+  const res = await fetch("http://localhost:3000/api/tasks", {
+    method: "GET",
+  })
+  const testSvar: task[] = await res.json()
+  return { props: { testSvar }}
+}
+
+export default function Home({ testSvar }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <h1>
-      {testSvar[1].name}
-    </h1>
+    <h1 className='font-bold text-3xl'>Hei</h1>
   )
 }
