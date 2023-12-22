@@ -1,5 +1,5 @@
 export interface ITask {
-    _id: string;
+    _id?: string; //Will be generated when added, will be gotten when fetched
     title: string;
     description: string;
     approved: boolean;
