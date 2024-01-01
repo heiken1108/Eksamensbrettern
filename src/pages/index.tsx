@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import Navbar from "../components/Navbar/Navbar";
 import TaskCard from "../components/TaskCard/TaskCard";
 import { ITask } from "../data/types";
+import { NextPage } from "next";
 
 const exampleTask: ITask = {
   _id: "6584c66e45b4fce0a881ca64",
@@ -14,10 +15,11 @@ const exampleTask: ITask = {
   variables: ["a", "b"],
   operators: ["+"],
   example: "1+2",
-  exampleSolution: "3"
+  exampleSolution: "3",
+  category: "Grunnleggende"
 }
 
-export default function Home() {
+const Home: NextPage = () => {
   const router = useRouter();
   return (
     <>
@@ -40,3 +42,5 @@ export default function Home() {
     </>
   )
 }
+
+export default Home;

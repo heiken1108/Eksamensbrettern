@@ -11,4 +11,5 @@ export interface ITask {
     operators: string[];
     example: string;
     exampleSolution: string;
+    category: string;
 }

@@ -2,13 +2,10 @@ import type { InferGetServerSidePropsType } from 'next'
 import { ITask } from '../data/types'
 import TaskCard from '../components/TaskCard/TaskCard'
 import { useRouter } from 'next/router'
+import { getAllTasks } from '../lib/api'
 
 export async function getServerSideProps() {
-  
-  const res = await fetch(process.env.API_URI + "/tasks", {
-    method: "GET",
-  })
-  const tasks: ITask[] = await res.json()
+  const tasks: ITask[] = await getAllTasks();
   return { props: { tasks }}
 }
 

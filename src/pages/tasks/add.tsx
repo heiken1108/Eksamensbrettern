@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { ITask } from "../../data/types";
+import { createTask } from "../../lib/api";
+import { extractVariables } from "../../lib/taskSetup";
 
 export async function PostTask(task: ITask) {
-    
-    const res = await fetch("/api/tasks", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(task)
-    })
+    await createTask(task);
 }
 
 export default function AddTask() {
@@ -19,14 +14,15 @@ export default function AddTask() {
     const [ordinaryVersion, setOrdinaryVersion] = useState<string>("");
     const [textualVersion, setTextualVersion] = useState<string>("");
     const [solutionSteps, setSolutionSteps] = useState<string[]>([]);
-    const [variables, setVariables] = useState<string[]>([]);
-    const [operators, setOperators] = useState<string[]>([]);
     const [example, setExample] = useState<string>("");
     const [exampleSolution, setExampleSolution] = useState<string>("");
+    const [category, setCategory] = useState<string>("");
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         console.log("Submitted: " + title);
+        const variables = extractVariables(ordinaryVersion);
+        const operators = extractVariables(ordinaryVersion);
         const task: ITask = {
             title: title,
             description: description,
@@ -37,7 +33,8 @@ export default function AddTask() {
             variables: variables,
             operators: operators,
             example: example,
-            exampleSolution: exampleSolution
+            exampleSolution: exampleSolution,
+            category: category,
         }
         await PostTask(task);
     }
@@ -58,12 +55,31 @@ export default function AddTask() {
                         <input className=" border-2" type="text" name="description" id="description" required onChange={(e) => setDescription(e.target.value)} />
                     </label>
                     <label htmlFor="ordinaryVersion">
-                        Ordinary Version:
+                        Ordinary Version (& for variables, $ for operators):
                         <input className=" border-2" type="text" name="ordinaryVersion" id="ordinaryVersion" required onChange={(e) => setOrdinaryVersion(e.target.value)} />
                     </label>
                     <label htmlFor="textualVersion">
                         Textual Version:
                         <input className=" border-2" type="text" name="textualVersion" id="textualVersion" required onChange={(e) => setTextualVersion(e.target.value)} />
+                    </label>
+                    <label>
+                        Solution Steps:
+                        <input className=" border-2" type="text" name="solutionSteps" id="solutionSteps" />
+                        <button type="button" onClick={() => setSolutionSteps([...solutionSteps, (document.getElementById('solutionSteps') as HTMLInputElement)?.value])}>Add Step</button>
+                        <div>
+                            {solutionSteps.map((step, index) => {
+                                return (
+                                    <div key={index}>
+                                        <span>{index}: {solutionSteps[index]} </span>
+                                        <button type="button" onClick={() => {
+                                            const newSteps = [...solutionSteps];
+                                            newSteps.splice(index, 1);
+                                            setSolutionSteps(newSteps);
+                                        }}>Remove Step</button>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </label>
                     <label htmlFor="example">
                         Example:
@@ -72,6 +88,10 @@ export default function AddTask() {
                     <label htmlFor="exampleSolution">
                         Example Solution:
                         <input className=" border-2" type="text" name="exampleSolution" id="exampleSolution" required onChange={(e) => setExampleSolution(e.target.value)} />
+                    </label>
+                    <label htmlFor="category">
+                        Example Solution:
+                        <input className=" border-2" type="text" name="category" id="category" required onChange={(e) => setCategory(e.target.value)} />
                     </label>
                     <button type="submit">Add Task</button>
                 </form>
