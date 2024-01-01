@@ -12,4 +12,5 @@ export interface ITask {
     example: string;
     exampleSolution: string;
     category: string;
+    decimals: number;
 }

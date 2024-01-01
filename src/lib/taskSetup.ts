@@ -48,9 +48,7 @@ function replaceVariables(input: string, variableMap: Map<string, any>): string 
 function calculateSolution(inputTask: ITask, variableMap: Map<string, any>): string {
     let calculatedSteps: number[] = [];
     inputTask.solutionSteps.forEach((step, index) => {
-        console.log(step); 
         const variables = extractVariables(step);
-        console.log(variables);
         const values = variables.map(variable => variableMap.get(variable));
         const operator = operators.find((operator) => operator.sign === extractOperators(step)[0]);
         if (operator) {
@@ -58,8 +56,17 @@ function calculateSolution(inputTask: ITask, variableMap: Map<string, any>): str
             calculatedSteps.push(solution);
             variableMap.set(index.toString(), solution);
         }
-        console.log(variableMap);
-
     });
-    return calculatedSteps[calculatedSteps.length - 1].toString();
+    return roundToFixedIfNeeded(calculatedSteps[calculatedSteps.length - 1], inputTask.decimals).toString();
+}
+
+function roundToFixedIfNeeded(value: number, decimalPlaces: number): number {
+    const currentDecimalPlaces = (value.toString().split('.')[1] || '').length;
+    
+    if (currentDecimalPlaces > decimalPlaces) {
+      const factor = 10 ** decimalPlaces;
+      return Math.round(value * factor) / factor;
+    }
+
+    return value;
 }

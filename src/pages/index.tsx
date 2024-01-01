@@ -16,7 +16,8 @@ const exampleTask: ITask = {
   operators: ["+"],
   example: "1+2",
   exampleSolution: "3",
-  category: "Grunnleggende"
+  category: "Grunnleggende",
+  decimals: 0
 }
 
 const Home: NextPage = () => {
