@@ -3,6 +3,7 @@ import { ITask } from '../data/types'
 import TaskCard from '../components/TaskCard/TaskCard'
 import { useRouter } from 'next/router'
 import { getAllTasks } from '../lib/api'
+import { parse } from 'mathjs'
 
 export async function getServerSideProps() {
   const tasks: ITask[] = await getAllTasks();

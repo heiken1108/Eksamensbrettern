@@ -1,0 +1,17 @@
+Hva trenger jeg å hente ut fra selve stykket:
+- Variabler, Jeg trenger en global oversikt over alle variabler i stykket. Jeg lager et map med en gang
+- Operatorer
+
+Hvorfor trenger jeg variabler? For å kunne gi de verdier
+
+Hva trenger jeg for å regne ut stykket?
+1. Jeg trenger verdiene til variablene. De må oversettes til tall
+2. Jeg må hente ut operatoren som skal brukes for dette steget
+3. Enten har jeg en custom operator, eller så har jeg et evaluerbart stykke.
+3a. Hvis jeg har en custom operator, må jeg finne ut hvilken, og bruke calculate-funksjonen her
+3b. Hvis jeg har et evaluerbart stykke, må jeg evaluere det, variabel-mappet som scope
+
+
+
+
+Hva om: Jeg sier operatorer skal alltid skrives med store bokstaver eller tegn, mens variabler alltid skal skrives med små bokstaver. 

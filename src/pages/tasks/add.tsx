@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { ITask } from "../../data/types";
 import { createTask } from "../../lib/api";
-import { extractVariables } from "../../lib/taskSetup";
 import categories from "../../data/categories";
-
-export async function PostTask(task: ITask) {
-    await createTask(task);
-}
 
 export default function AddTask() {
 
@@ -14,6 +9,8 @@ export default function AddTask() {
     const [description, setDescription] = useState<string>("");
     const [ordinaryVersion, setOrdinaryVersion] = useState<string>("");
     const [textualVersion, setTextualVersion] = useState<string>("");
+    const [variables, setVariables] = useState<string[]>([]);
+    const [newVariable, setNewVariable] = useState<string>("");
     const [solutionSteps, setSolutionSteps] = useState<string[]>([]);
     const [newStep, setNewStep] = useState<string>("");
     const [example, setExample] = useState<string>("");
@@ -23,9 +20,7 @@ export default function AddTask() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Submitted: " + title);
-        const variables = extractVariables(ordinaryVersion);
-        const operators = extractVariables(ordinaryVersion);
+        alert("Submitted: " + title);
         const task: ITask = {
             title: title,
             description: description,
@@ -34,13 +29,13 @@ export default function AddTask() {
             textualVersion: textualVersion,
             solutionSteps: solutionSteps,
             variables: variables,
-            operators: operators,
             example: example,
             exampleSolution: exampleSolution,
             category: category,
             decimals: decimals,
         }
-        await PostTask(task);
+        await createTask(task);
+        emptyForm();
     }
 
     const handleAddStep = () => {
@@ -49,6 +44,28 @@ export default function AddTask() {
             setNewStep(''); 
         }
     };
+
+    const handleAddVariable = () => {
+        if (newVariable.trim() !== '') {
+            setVariables([...variables, newVariable]);
+            setNewVariable(''); 
+        }
+    };
+
+    function emptyForm() {
+        setTitle("");
+        setDescription("");
+        setOrdinaryVersion("");
+        setTextualVersion("");
+        setVariables([]);
+        setNewVariable("");
+        setSolutionSteps([]);
+        setNewStep("");
+        setExample("");
+        setExampleSolution("");
+        setCategory("");
+        setDecimals(0);
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center">
@@ -98,7 +115,7 @@ export default function AddTask() {
             </select>
             </div>
             <label className="mb-4" htmlFor="ordinaryVersion">
-                Ordinary version (& for variables, $ for operators):
+                Ordinary version (& for variables, $ for operators, # for functions):
                 <input
                     className="border p-2 w-full"
                     type="text"
@@ -118,6 +135,44 @@ export default function AddTask() {
                     required
                     onChange={(e) => setTextualVersion(e.target.value)}
                 />
+            </label>
+            <label className="mb-4" htmlFor="variables">
+                Variables:
+                <div className="flex items-center space-x-2">
+                    <input
+                        className="border p-2 flex-grow"
+                        type="text"
+                        name="variables"
+                        id="variables"
+                        value={newVariable}
+                        onChange={(e) => setNewVariable(e.target.value)}
+                    />
+                <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    type="button"
+                    onClick={handleAddVariable}
+                >
+                    Add variable
+                </button>
+                </div>
+                <div>
+                    {variables.map((step, index) => (
+                    <div key={index} className="flex items-center justify-between mt-2">
+                        <span>{index}: {variables[index]}</span>
+                        <button
+                            className="text-red-500"
+                            type="button"
+                            onClick={() => {
+                            const newVariables = [...variables];
+                            newVariables.splice(index, 1);
+                            setVariables(newVariables);
+                            }}
+                        >
+                            Remove variable
+                        </button>
+                    </div>
+                    ))}
+                </div>
             </label>
             <label className="mb-4" htmlFor="solutionSteps">
                 Solution Steps:

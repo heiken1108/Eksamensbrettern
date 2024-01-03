@@ -1,10 +1,14 @@
-const operators = [
+import { parse } from "mathjs";
+import { Operator } from "./types";
+
+
+const operators: Operator[] = [
     {   
-        name: "Addition",
-        sign: "+",
-        calculate: addition
+        name: "Summation",
+        sign: "S",
+        calculate: summation
     },
-    {   
+    /*{   
         name: "Subtraction",
         sign: "-",
         calculate: subtraction
@@ -14,11 +18,7 @@ const operators = [
         sign: "*",
         calculate: multiplication
     },
-    {   
-        name: "Division",
-        sign: "/",
-        calculate: division
-    }, 
+    
     {
         name: "Cosine",
         sign: "cos",
@@ -43,13 +43,28 @@ const operators = [
         name: "Product",
         sign: "prod",
         calculate: product
-    }
+    },
+    {
+        name: "Defined integral",
+        sign: "I",
+        calculate: definedIntegral
+    }, 
+    {
+        name: "Derivative",
+        sign: "D",
+        calculate: derivative
+    }*/
 ]
 
-function addition(variables: number[]): number {
-    return variables[0] + variables[1];
+function summation(step: string, relevantVariables: string[], variables: Map<string, number>): number {
+    const relevantValues = relevantVariables.map(variable => variables.get(variable));
+    let s = 0;
+    relevantValues.forEach(value => {
+        s += value ?? 0;
+    });
+    return s;
 }
-
+/*
 function subtraction(variables: number[]): number {
     return variables[0] - variables[1];
 }
@@ -89,5 +104,17 @@ function product(variables: number[]): number {
     });
     return product;
 }
+
+function definedIntegral(variables: number[]): number {
+    //TODO: Implement defined integral
+    return 0;
+}
+
+function derivative(variables: number[]): number {
+    //TODO: Implement derivative
+    return 0
+}*/
+
+
 
 export default operators;

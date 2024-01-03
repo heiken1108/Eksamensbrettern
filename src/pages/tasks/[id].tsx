@@ -1,7 +1,7 @@
 import { getTaskById } from "../../lib/api";
 import type { InferGetServerSidePropsType } from 'next'
-import { createVariant } from "../../lib/taskSetup";
 import { useState } from "react";
+import { createTaskVariant } from "../../lib/taskHandling";
 
 
 export default function Task({ task, variant }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -9,16 +9,16 @@ export default function Task({ task, variant }: InferGetServerSidePropsType<type
     const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
 
     const handleCheckAnswer = () => {
-        const isCorrect = userAnswer.trim().toLowerCase() === variant[1].trim().toLowerCase();
+        const isCorrect = userAnswer.trim().toLowerCase() === variant.solution.trim().toLowerCase();
         setIsAnswerCorrect(isCorrect);
     };
-
+    
     return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="flex-grow flex items-center justify-center">
                 <div className="max-w-md w-full p-6 bg-white rounded-md shadow-md">
                     <h1 className="text-2xl font-bold mb-4">{task.title}</h1>
-                    <p className="text-gray-600 mb-4">{variant[0]}</p>
+                    <p className="text-gray-600 mb-4">{variant.variant}</p>
                     <p className="text-gray-700 mb-4">Category: {task.category}</p>
                     <p className="text-gray-700 mb-4">Maks antall desimaler: {task.decimals}</p>
 
@@ -55,7 +55,8 @@ export async function getServerSideProps(context: any) {
     const { id } = context.query;
 
     const task = await getTaskById(id);
-    const variant = createVariant(task);
+    //const variant = createVariant(task);
+    const variant = createTaskVariant(task);
     return {
         props: {
             task,

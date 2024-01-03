@@ -6,6 +6,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "mathjs": "^12.2.1",
+    "mathjs-simple-integral": "^0.1.1",
     "mongodb": "^4.8.1",
     "next": "latest",
     "react": "^18.2.0",
