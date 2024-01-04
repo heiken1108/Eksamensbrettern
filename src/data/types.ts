@@ -7,12 +7,30 @@ export interface ITask {
     ordinaryVersion: string;
     textualVersion: string;
     solutionSteps: string[];
-    variables: string[];
-    operators?: string[]; //Dårlig at den bae er ?, men blir sånn nå ass
+    variables: Variable[];
+    operators?: string[]; //Dårlig at den bare er ?, men blir sånn nå ass
     example: string;
     exampleSolution: string;
     category: string;
     decimals: number;
+}
+
+export interface VariableDomain {
+    min?: number;
+    max?: number;
+    stepSize?: number;
+    values?: number[];
+    maxDecimals?: number;
+}
+
+export const VariableTypes = [
+    "Integer", "Semicontinuous", "Continuous", "Specific"
+]
+
+export interface Variable {
+    name: string;
+    type: "Integer" | "Semicontinuous" | "Continuous" | "Specific";
+    domain: VariableDomain;
 }
 
 export type TaskVariant = {

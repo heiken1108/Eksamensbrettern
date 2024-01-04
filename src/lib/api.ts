@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+import clientPromise from "../../lib/mongodb";
 import { ITask } from "../data/types";
 
 export async function getAllTasks() {
@@ -14,6 +16,15 @@ export async function getTaskById(id: string) {
     })
     const data = await res.json();
     return data;
+}
+
+export async function getTaskByIdFaster(id: string) { //Synes vel uansett at opplegget med å fetche fra API er ganske dust. Men det får gå for nå
+    const db = (await clientPromise).db("BrettEksamen");
+
+    const task = await db.collection("tasks").findOne({
+        _id: new ObjectId(id)
+    });
+    return task;
 }
 
 export async function createTask(task: ITask) {

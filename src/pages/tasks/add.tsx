@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { ITask } from "../../data/types";
+import { ITask, Variable, VariableTypes } from "../../data/types";
 import { createTask } from "../../lib/api";
 import categories from "../../data/categories";
+import { useRouter } from "next/router";
 
 export default function AddTask() {
+    const router = useRouter();
 
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [ordinaryVersion, setOrdinaryVersion] = useState<string>("");
     const [textualVersion, setTextualVersion] = useState<string>("");
-    const [variables, setVariables] = useState<string[]>([]);
+    const [variables, setVariables] = useState<Variable[]>([]);
     const [newVariable, setNewVariable] = useState<string>("");
     const [solutionSteps, setSolutionSteps] = useState<string[]>([]);
     const [newStep, setNewStep] = useState<string>("");
@@ -34,8 +36,15 @@ export default function AddTask() {
             category: category,
             decimals: decimals,
         }
-        await createTask(task);
-        emptyForm();
+        //await createTask(task);
+        const res = await fetch("/api/tasks", { //Denne må være her av en eller annen grunn, sier den ikke finner dns-module...
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(task)
+        });
+        router.push(".")
     }
 
     const handleAddStep = () => {
@@ -47,29 +56,56 @@ export default function AddTask() {
 
     const handleAddVariable = () => {
         if (newVariable.trim() !== '') {
-            setVariables([...variables, newVariable]);
+            const newVariableObject: Variable = {
+                name: newVariable,
+                type: "Integer",
+                domain: {}
+            }
+            setVariables([...variables, newVariableObject]);
             setNewVariable(''); 
         }
-    };
+    }
 
-    function emptyForm() {
-        setTitle("");
-        setDescription("");
-        setOrdinaryVersion("");
-        setTextualVersion("");
-        setVariables([]);
-        setNewVariable("");
-        setSolutionSteps([]);
-        setNewStep("");
-        setExample("");
-        setExampleSolution("");
-        setCategory("");
-        setDecimals(0);
+    const handleChangeVariableType = (value: string, index: number) => {
+        const newVariables = [...variables];
+        newVariables[index].type = value as "Integer" | "Semicontinuous" | "Continuous" | "Specific";
+        setVariables(newVariables);
+    }
+
+    //Kan det gjøres på en bedre måte enn å ha mange forskjelige funksjoner som gjør nesten samme greia? Svaret er nok ja
+    const handleChangeMin = (value: string, index: number) => {
+        const newVariables = [...variables];
+        newVariables[index].domain.min = Number(value);
+        setVariables(newVariables);
+    }
+
+    const handleChangeMax = (value: string, index: number) => {
+        const newVariables = [...variables];
+        newVariables[index].domain.max = Number(value);
+        setVariables(newVariables);
+    }
+
+    const handleChangeStepsize = (value: string, index: number) => {
+        const newVariables = [...variables];
+        newVariables[index].domain.stepSize = Number(value);
+        setVariables(newVariables);
+    }
+
+    const handleChangeMaxDecimals = (value: string, index: number) => {
+        const newVariables = [...variables];
+        newVariables[index].domain.maxDecimals = Number(value);
+        setVariables(newVariables);
+    }
+
+    const handleChangeValues = (values: string, index: number) => {
+        const newVariables = [...variables];
+        newVariables[index].domain.values = values.split(",").map(value => Number(value));
+        setVariables(newVariables);
     }
 
     return (
         <div className="min-h-screen flex items-center justify-center">
-            <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-md">
+            <div className="w-full max-w-max p-8 bg-white rounded-lg shadow-md">
                 <h1 className="text-4xl mb-8 text-center">Add Task</h1>
                 <form onSubmit={handleSubmit}>
                 <label className="mb-4" htmlFor="title">
@@ -115,7 +151,7 @@ export default function AddTask() {
             </select>
             </div>
             <label className="mb-4" htmlFor="ordinaryVersion">
-                Ordinary version (& for variables, $ for operators, # for functions):
+                Ordinary version (& for equation):
                 <input
                     className="border p-2 w-full"
                     type="text"
@@ -158,9 +194,62 @@ export default function AddTask() {
                 <div>
                     {variables.map((step, index) => (
                     <div key={index} className="flex items-center justify-between mt-2">
-                        <span>{index}: {variables[index]}</span>
+                        <span>{variables[index].name}:</span>
+                        <div className="flex-1 items-center space-x-2 w-full">
+                        <select
+                            className="flex-1 border p-2 rounded-md mr-2"
+                            name="variableType"
+                            id="variableType"
+                            required
+                            onChange={(e) => handleChangeVariableType(e.target.value, index)} //Nå lurer jeg på om set-en ikke er satt før man sender, TODO: Sjekke dette
+                        >
+                            {VariableTypes.map((variableType) => (
+                                <option key={variableType} value={variableType}>
+                                    {variableType}
+                                </option>
+                            ))}
+                        </select>
+                        {variables[index].type === "Integer" && (
+                            <>  
+                                Min:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Minimum value" onChange={(e) => handleChangeMin(e.target.value, index)}/>
+                                Max:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum value" onChange={(e) => handleChangeMax(e.target.value, index)}/>
+                            </>
+                        )}
+
+                        {variables[index].type === "Semicontinuous" && (
+                            <>
+                                Min:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Minimum value" onChange={(e) => handleChangeMin(e.target.value, index)}/>
+                                Max:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum value" onChange={(e) => handleChangeMax(e.target.value, index)}/>
+                                Stepsize:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Stepsize" onChange={(e) => handleChangeStepsize(e.target.value, index)}/>
+                            </>
+                        )}
+
+                        {variables[index].type === "Continuous" && (
+                            <>
+                                Min:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Minimum value" onChange={(e) => handleChangeMin(e.target.value, index)}/>
+                                Max:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum value" onChange={(e) => handleChangeMax(e.target.value, index)}/>
+                                Max decimals:
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum decimals" onChange={(e) => handleChangeMaxDecimals(e.target.value, index)}/>
+                            </>
+                        )}
+
+                        {variables[index].type === "Specific" && (
+                            <>
+                            Values (comma-separated):
+                            <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="E.g 1,2,3" onChange={(e) => handleChangeValues(e.target.value, index)}/>
+                            </>
+                        )}
+
+                        </div>
                         <button
-                            className="text-red-500"
+                            className="text-red-500 ml-2"
                             type="button"
                             onClick={() => {
                             const newVariables = [...variables];

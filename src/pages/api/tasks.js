@@ -19,8 +19,6 @@ export default async function handler(req, res) {
             break;
     }
 
-    
-
     async function getTasks() {
         const tasks = await db.collection("tasks").find({}).toArray();
         res.json(tasks);

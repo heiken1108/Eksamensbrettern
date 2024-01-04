@@ -20,7 +20,7 @@ export default function Task({ task, variant }: InferGetServerSidePropsType<type
                     <h1 className="text-2xl font-bold mb-4">{task.title}</h1>
                     <p className="text-gray-600 mb-4">{variant.variant}</p>
                     <p className="text-gray-700 mb-4">Category: {task.category}</p>
-                    <p className="text-gray-700 mb-4">Maks antall desimaler: {task.decimals}</p>
+                    <p className="text-gray-700 mb-4">Bruk maksimalt {task.decimals} desimaler i svaret</p>
 
                     <label className="block mb-4">
                         Your Answer:
@@ -55,7 +55,6 @@ export async function getServerSideProps(context: any) {
     const { id } = context.query;
 
     const task = await getTaskById(id);
-    //const variant = createVariant(task);
     const variant = createTaskVariant(task);
     return {
         props: {

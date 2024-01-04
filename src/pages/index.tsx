@@ -4,22 +4,6 @@ import TaskCard from "../components/TaskCard/TaskCard";
 import { ITask } from "../data/types";
 import { NextPage } from "next";
 
-const exampleTask: ITask = {
-  _id: "6584c66e45b4fce0a881ca64",
-  title: "Eksempel",
-  description: "Eksempel erre",
-  approved: false,
-  ordinaryVersion: "&a&$+$$b$",
-  textualVersion: "a+b",
-  solutionSteps: ["&a&$+$&b&"],
-  variables: ["a", "b"],
-  operators: ["+"],
-  example: "1+2",
-  exampleSolution: "3",
-  category: "Grunnleggende",
-  decimals: 0
-}
-
 const Home: NextPage = () => {
   const router = useRouter();
   return (
@@ -35,9 +19,7 @@ const Home: NextPage = () => {
     <div id="topPicksDiv" className="flex justify-start flex-col">
       <h2 className="text-3xl p-5">Top picks</h2>
       <div className="grid grid-cols-3 gap-3 p-3">
-        <TaskCard task={exampleTask} />
-        <TaskCard task={exampleTask} />
-        <TaskCard task={exampleTask}/>
+        
       </div>
     </div>
     </>

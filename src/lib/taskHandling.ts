@@ -9,10 +9,49 @@ import { ITask, Operator, TaskVariant } from "../data/types";
 export function createTaskVariant(task: ITask): TaskVariant{
     let variablesMap = new Map<string, number>();
     task.variables.forEach(variable => {
-        //TODO: Tar foreløpig bare heltall mellom 1 og 10. Her bør man ha funksjonalitet for range og verdi-type
-        const value = Math.floor(Math.random() * 10) + 1;
-        variablesMap.set(variable, value);
+        let value: number;
+        switch (variable.type) {
+            case "Integer": 
+                console.log("Int: ", variable.name);
+                if (variable.domain.max !== undefined && variable.domain.min !== undefined) {
+                    value = Math.floor(Math.random() * (variable.domain.max - variable.domain.min + 1)) + variable.domain.min
+                } else {
+                    value = 0;
+                }
+                break;
+            case "Semicontinuous":
+                console.log("Semi: ", variable.name);
+                if (variable.domain.max !== undefined && variable.domain.min !== undefined && variable.domain.stepSize !== undefined) {
+                    const h: number = (variable.domain.max - variable.domain.min) / variable.domain.stepSize; //Må fikse at den ikke alltid er et mmultiplum som går opp
+                    const i: number = Math.floor(Math.random() * (h + 1)); //Litt usikker akkurat denne utregningen
+                    value = i * variable.domain.stepSize + variable.domain.min;
+                } else {
+                    value = 0;
+                }
+                break;
+            case "Continuous": 
+                console.log("Cont: ", variable.name);
+                if (variable.domain.max !== undefined && variable.domain.min !== undefined && variable.domain.maxDecimals !== undefined) {
+                    value = parseFloat((Math.random() * (variable.domain.max - variable.domain.min) + variable.domain.min).toFixed(variable.domain.maxDecimals));
+                } else {
+                    value = 0;
+                }
+                break;
+            case "Specific": 
+                console.log("Specific: ", variable.name);
+                if (variable.domain.values !== undefined && variable.domain.values.length > 0) {
+                    value = variable.domain.values[Math.floor(Math.random() * variable.domain.values.length)]
+                } else {
+                    value = 0;
+                }
+                break;
+            default: 
+                console.log("Default: ", variable.name);   
+                value = 0;  
+        }
+        variablesMap.set(variable.name, value);
     });
+    console.log("Variables map: ", variablesMap);
     const variant: string = replaceVariables(task, variablesMap);
     const solution: string = calculateSolution(task, variablesMap);
     return {variant: variant, solution: solution}
