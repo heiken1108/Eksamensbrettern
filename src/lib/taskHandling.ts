@@ -43,10 +43,19 @@ function calculateStep(step: string, variables: Map<string, number>): number{
 }
 
 function replaceVariables(task: ITask, variableMap: Map<string, any>): string {
-    return task.ordinaryVersion.replace(/\$/g, "").replace(/&([^&]+)&/g, (match, p1) => {
-        const key = p1.trim();
-        return variableMap.has(key) ? variableMap.get(key).toString() : match;
-    });
+    let replacedString = "";
+    let inEquation = false;
+    for (let i = 0; i < task.ordinaryVersion.length; i++) {
+        const char = task.ordinaryVersion[i];
+        if (char === "&") {
+            inEquation = !inEquation;
+        } else if (inEquation && variableMap.has(char)) {
+            replacedString += variableMap.get(char);
+        } else {
+            replacedString += char;
+        }
+    }
+    return replacedString;
 }
 
 function extractOperator(step: string): Operator | undefined { //Forventer ikke at operator har rare tegn rundt seg
