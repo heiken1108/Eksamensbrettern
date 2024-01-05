@@ -22,7 +22,7 @@ export function createTaskVariant(task: ITask): TaskVariant{
             case "Semicontinuous":
                 console.log("Semi: ", variable.name);
                 if (variable.domain.max !== undefined && variable.domain.min !== undefined && variable.domain.stepSize !== undefined) {
-                    const h: number = (variable.domain.max - variable.domain.min) / variable.domain.stepSize; //Må fikse at den ikke alltid er et mmultiplum som går opp
+                    const h: number = (variable.domain.max - variable.domain.min) / variable.domain.stepSize; 
                     const i: number = Math.floor(Math.random() * (h + 1)); //Litt usikker akkurat denne utregningen
                     value = i * variable.domain.stepSize + variable.domain.min;
                 } else {
@@ -83,19 +83,40 @@ function calculateStep(step: string, variables: Map<string, number>): number{
 
 function replaceVariables(task: ITask, variableMap: Map<string, any>): string {
     let replacedString = "";
+    let variableName = "";
     let inEquation = false;
+
     for (let i = 0; i < task.ordinaryVersion.length; i++) {
         const char = task.ordinaryVersion[i];
+
         if (char === "&") {
             inEquation = !inEquation;
-        } else if (inEquation && variableMap.has(char)) {
-            replacedString += variableMap.get(char);
+            if (!inEquation) {
+                // Check if the variableName is in the variableMap
+                if (variableMap.has(variableName)) {
+                    replacedString += variableMap.get(variableName);
+                } else {
+                    replacedString += "&" + variableName; // If not found, append the original variable name
+                }
+                variableName = ""; // Reset variableName
+            }
+        } else if (inEquation) {
+            variableName += char;
         } else {
             replacedString += char;
         }
     }
+
+    // Check if there's an unfinished variableName at the end
+    if (inEquation && variableMap.has(variableName)) {
+        replacedString += variableMap.get(variableName);
+    } else if (inEquation) {
+        replacedString += "&" + variableName; // If not found, append the original variable name
+    }
+
     return replacedString;
 }
+
 
 function extractOperator(step: string): Operator | undefined { //Forventer ikke at operator har rare tegn rundt seg
     const matchingOperator = operators.find(operator => step.includes(operator.sign));

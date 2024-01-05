@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ITask, Variable, VariableTypes } from "../../data/types";
-import { createTask } from "../../lib/api";
 import categories from "../../data/categories";
 import { useRouter } from "next/router";
 
@@ -151,7 +150,7 @@ export default function AddTask() {
             </select>
             </div>
             <label className="mb-4" htmlFor="ordinaryVersion">
-                Ordinary version (& for equation):
+                Ordinary version (& for equation, $ for LaTeX):
                 <input
                     className="border p-2 w-full"
                     type="text"
@@ -201,7 +200,7 @@ export default function AddTask() {
                             name="variableType"
                             id="variableType"
                             required
-                            onChange={(e) => handleChangeVariableType(e.target.value, index)} //Nå lurer jeg på om set-en ikke er satt før man sender, TODO: Sjekke dette
+                            onChange={(e) => handleChangeVariableType(e.target.value, index)}
                         >
                             {VariableTypes.map((variableType) => (
                                 <option key={variableType} value={variableType}>
@@ -242,8 +241,8 @@ export default function AddTask() {
 
                         {variables[index].type === "Specific" && (
                             <>
-                            Values (comma-separated):
-                            <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="E.g 1,2,3" onChange={(e) => handleChangeValues(e.target.value, index)}/>
+                                Values (comma-separated):
+                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="E.g 1,2,3" onChange={(e) => handleChangeValues(e.target.value, index)}/>
                             </>
                         )}
 

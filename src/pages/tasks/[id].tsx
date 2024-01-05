@@ -2,6 +2,7 @@ import { getTaskById } from "../../lib/api";
 import type { InferGetServerSidePropsType } from 'next'
 import { useState } from "react";
 import { createTaskVariant } from "../../lib/taskHandling";
+import { abs, evaluate, parse, pi } from "mathjs";
 
 
 export default function Task({ task, variant }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -56,6 +57,8 @@ export async function getServerSideProps(context: any) {
 
     const task = await getTaskById(id);
     const variant = createTaskVariant(task);
+
+    console.log(variant);
     return {
         props: {
             task,
