@@ -1,4 +1,4 @@
-import { forEach, parse } from "mathjs";
+import { parse } from "mathjs";
 import operators from "../data/operators";
 import { ITask, Operator, TaskVariant } from "../data/types";
 
@@ -47,7 +47,7 @@ export function createTaskVariant(task: ITask): TaskVariant{
         variablesMap.set(variable.name, value);
     });
     console.log("Variables map: ", variablesMap);
-    const variant: string = replaceVariables(task, variablesMap);
+    const variant: string = addMathJax(replaceVariables(task, variablesMap));
     const solution: string = calculateSolution(task, variablesMap);
     return {variant: variant, solution: solution}
 }
@@ -106,13 +106,14 @@ function replaceVariables(task: ITask, variableMap: Map<string, any>): string {
 
         //Bytt ut med likningen med verdier
         const equationToReplace: string = equationMap.get(equation) as string; // Add type assertion
-        replacedString = replaceAtIndex(replacedString, equationEncapsulators[i], equationEncapsulators[i+1], equationToReplace)
+        const newReplacedString = replaceAtIndex(replacedString, equationEncapsulators[i], equationEncapsulators[i+1], equationToReplace)
 
         //Ta hensyn til at lengden på strengen har endret seg siden man fjerner &-ene og legger til et tall med potensielt annen lengde
-        const lengthDifference = equationToReplace.length - equation.length - 2;
+        const lengthDifference = newReplacedString.length - replacedString.length;
         for (let j = i+2; j < equationEncapsulators.length; j++) {
             equationEncapsulators[j] = equationEncapsulators[j] + lengthDifference;
         }
+        replacedString = newReplacedString;
     }
     return replacedString;
 
@@ -136,6 +137,19 @@ function getAllIndexes(inputString: string, targetChar: string): number[] {
     return indexes;
 }
 
+function addMathJax(task: string): string {
+    let newTaskString = task;
+    let inEquation = false;
+    while (newTaskString.includes("$")) {
+        inEquation = !inEquation;
+        if (inEquation) {
+            newTaskString = newTaskString.replace("$", "\\(");
+        } else {
+            newTaskString = newTaskString.replace("$", "\\)");
+        }
+    }
+    return newTaskString;
+}
 
 function extractOperator(step: string): Operator | undefined { //Forventer ikke at operator har rare tegn rundt seg
     const matchingOperator = operators.find(operator => step.includes(operator.sign));
