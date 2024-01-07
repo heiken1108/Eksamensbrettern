@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "better-react-mathjax": "^2.0.3",
     "mathjs": "^12.2.1",
     "mathjs-simple-integral": "^0.1.1",
     "mongodb": "^4.8.1",

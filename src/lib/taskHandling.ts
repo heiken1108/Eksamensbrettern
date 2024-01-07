@@ -1,4 +1,4 @@
-import { parse } from "mathjs";
+import { forEach, parse } from "mathjs";
 import operators from "../data/operators";
 import { ITask, Operator, TaskVariant } from "../data/types";
 
@@ -12,7 +12,6 @@ export function createTaskVariant(task: ITask): TaskVariant{
         let value: number;
         switch (variable.type) {
             case "Integer": 
-                console.log("Int: ", variable.name);
                 if (variable.domain.max !== undefined && variable.domain.min !== undefined) {
                     value = Math.floor(Math.random() * (variable.domain.max - variable.domain.min + 1)) + variable.domain.min
                 } else {
@@ -20,7 +19,6 @@ export function createTaskVariant(task: ITask): TaskVariant{
                 }
                 break;
             case "Semicontinuous":
-                console.log("Semi: ", variable.name);
                 if (variable.domain.max !== undefined && variable.domain.min !== undefined && variable.domain.stepSize !== undefined) {
                     const h: number = (variable.domain.max - variable.domain.min) / variable.domain.stepSize; 
                     const i: number = Math.floor(Math.random() * (h + 1)); //Litt usikker akkurat denne utregningen
@@ -30,7 +28,6 @@ export function createTaskVariant(task: ITask): TaskVariant{
                 }
                 break;
             case "Continuous": 
-                console.log("Cont: ", variable.name);
                 if (variable.domain.max !== undefined && variable.domain.min !== undefined && variable.domain.maxDecimals !== undefined) {
                     value = parseFloat((Math.random() * (variable.domain.max - variable.domain.min) + variable.domain.min).toFixed(variable.domain.maxDecimals));
                 } else {
@@ -38,7 +35,6 @@ export function createTaskVariant(task: ITask): TaskVariant{
                 }
                 break;
             case "Specific": 
-                console.log("Specific: ", variable.name);
                 if (variable.domain.values !== undefined && variable.domain.values.length > 0) {
                     value = variable.domain.values[Math.floor(Math.random() * variable.domain.values.length)]
                 } else {
@@ -46,7 +42,6 @@ export function createTaskVariant(task: ITask): TaskVariant{
                 }
                 break;
             default: 
-                console.log("Default: ", variable.name);   
                 value = 0;  
         }
         variablesMap.set(variable.name, value);
@@ -60,8 +55,6 @@ export function createTaskVariant(task: ITask): TaskVariant{
 function calculateSolution(task: ITask, variables: Map<string, number>): string{
     let calculatedSteps: number[] = []; //Kan hende jeg må endre her om jeg ikke lenger bare skal ha utreninger
     task.solutionSteps.forEach((step, index) => {
-        console.log("Step: ", index, step);
-        console.log("Variables: ", variables);
         const solution = calculateStep(step, variables);
         calculatedSteps.push(solution);
         variables.set("s_" + index.toString(), solution);
@@ -71,7 +64,6 @@ function calculateSolution(task: ITask, variables: Map<string, number>): string{
 
 function calculateStep(step: string, variables: Map<string, number>): number{
     const operator = extractOperator(step);
-    console.log("Variables in step: ", variables);
     if (operator) { //Custom operator
         const relevantVariables = extractRelevantVariables(step);
         return operator.calculate(step, relevantVariables, variables);
@@ -82,39 +74,66 @@ function calculateStep(step: string, variables: Map<string, number>): number{
 }
 
 function replaceVariables(task: ITask, variableMap: Map<string, any>): string {
-    let replacedString = "";
-    let variableName = "";
-    let inEquation = false;
+    //Finn index til alle likninger
+    let equationEncapsulators: number[] = getAllIndexes(task.ordinaryVersion, "&");
+    //Hent ut alle variabler
+    const variables = Array.from(variableMap.keys());
 
-    for (let i = 0; i < task.ordinaryVersion.length; i++) {
-        const char = task.ordinaryVersion[i];
-
-        if (char === "&") {
-            inEquation = !inEquation;
-            if (!inEquation) {
-                // Check if the variableName is in the variableMap
-                if (variableMap.has(variableName)) {
-                    replacedString += variableMap.get(variableName);
-                } else {
-                    replacedString += "&" + variableName; // If not found, append the original variable name
-                }
-                variableName = ""; // Reset variableName
+    //Finn strengene til alle likningene
+    const equations = [];
+    for (let i = 0; i < equationEncapsulators.length; i+=2) {
+        const equation = task.ordinaryVersion.substring(equationEncapsulators[i]+1, equationEncapsulators[i+1]);
+        equations.push(equation);
+    }
+    
+    //Lag et map der en generell likning mapper til en likning med variabler byttet ut med tall
+    const equationMap = new Map<string, string>();
+    equations.forEach((equation) => {
+        let equationToChange = equation;
+        variables.forEach((variable) => {
+            if (equation.includes(variable)) {
+                equationToChange = equationToChange.replace(new RegExp(variable, 'g'), variableMap.get(variable));
             }
-        } else if (inEquation) {
-            variableName += char;
-        } else {
-            replacedString += char;
+        })
+        equationMap.set(equation, equationToChange);
+    })
+
+    //Bytt ut alle likningene i hele oppgaven
+    let replacedString = task.ordinaryVersion;
+    for (let i = 0; i < equationEncapsulators.length; i+= 2) {
+        //Finn likningen
+        const equation = replacedString.substring(equationEncapsulators[i]+1, equationEncapsulators[i+1]);
+
+        //Bytt ut med likningen med verdier
+        const equationToReplace: string = equationMap.get(equation) as string; // Add type assertion
+        replacedString = replaceAtIndex(replacedString, equationEncapsulators[i], equationEncapsulators[i+1], equationToReplace)
+
+        //Ta hensyn til at lengden på strengen har endret seg siden man fjerner &-ene og legger til et tall med potensielt annen lengde
+        const lengthDifference = equationToReplace.length - equation.length - 2;
+        for (let j = i+2; j < equationEncapsulators.length; j++) {
+            equationEncapsulators[j] = equationEncapsulators[j] + lengthDifference;
+        }
+    }
+    return replacedString;
+
+
+}
+
+function replaceAtIndex(originalString: string, indexStart: number, indexEnd: number, replacement: string): string {
+    const replaceString = originalString.substring(0, indexStart) + replacement + originalString.substring(indexEnd + 1);
+    return replaceString;
+}
+
+function getAllIndexes(inputString: string, targetChar: string): number[] {
+    const indexes: number[] = [];
+
+    for (let i = 0; i < inputString.length; i++) {
+        if (inputString[i] === targetChar) {
+            indexes.push(i);
         }
     }
 
-    // Check if there's an unfinished variableName at the end
-    if (inEquation && variableMap.has(variableName)) {
-        replacedString += variableMap.get(variableName);
-    } else if (inEquation) {
-        replacedString += "&" + variableName; // If not found, append the original variable name
-    }
-
-    return replacedString;
+    return indexes;
 }
 
 
