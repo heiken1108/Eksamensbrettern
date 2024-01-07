@@ -151,11 +151,11 @@ export default function AddTask() {
             </div>
             <label className="mb-4" htmlFor="ordinaryVersion">
                 Ordinary version (& for equation, $ for LaTeX):
-                <input
+                <textarea
                     className="border p-2 w-full"
-                    type="text"
                     name="ordinaryVersion"
                     id="ordinaryVersion"
+                    placeholder="E.g. Solve the equation $&x^2 + 2x + 1 = 0&$ where $x=x$"
                     required
                     onChange={(e) => setOrdinaryVersion(e.target.value)}
                 />

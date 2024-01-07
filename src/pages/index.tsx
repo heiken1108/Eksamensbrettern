@@ -17,8 +17,6 @@ const Home: NextPage = () => {
     <div id="topPicksDiv" className="flex justify-start flex-col">
       <h2 className="text-3xl p-5">Top picks</h2>
       <div className="grid grid-cols-3 gap-3 p-3">
-        <MathJax>{"\\(\\frac{10}{4x} \\approx 2^{12}\\)"}</MathJax>
-        <MathJax>{"\\(3*4\\)"}</MathJax>
       </div>
     </div>
     </>
