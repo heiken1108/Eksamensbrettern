@@ -27,6 +27,12 @@ export async function getTaskByIdFaster(id: string) { //Synes vel uansett at opp
     return task;
 }
 
+export async function getTasksByCategory(category: string) { //Funker itte du
+    const db = (await clientPromise).db("BrettEksamen");
+    const tasks = await db.collection("tasks").find({category: category}).toArray();
+    return tasks;
+}
+
 export async function createTask(task: ITask) {
     const res = await fetch("/api/tasks", { //Hvorfor må den ha sånn fakka link?
         method: "POST",
@@ -35,4 +41,6 @@ export async function createTask(task: ITask) {
         },
         body: JSON.stringify(task)
     });
+    const data = await res.json();
+    return data;
 }

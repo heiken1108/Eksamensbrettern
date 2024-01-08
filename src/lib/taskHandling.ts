@@ -137,7 +137,7 @@ function getAllIndexes(inputString: string, targetChar: string): number[] {
     return indexes;
 }
 
-function addMathJax(task: string): string {
+export function addMathJax(task: string): string {
     let newTaskString = task;
     let inEquation = false;
     while (newTaskString.includes("$")) {

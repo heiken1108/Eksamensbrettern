@@ -5,7 +5,6 @@ export interface ITask {
     approved: boolean;
     latexVersion?: string;
     ordinaryVersion: string;
-    textualVersion: string;
     solutionSteps: string[];
     variables: Variable[];
     operators?: string[]; //Dårlig at den bare er ?, men blir sånn nå ass
@@ -13,6 +12,8 @@ export interface ITask {
     exampleSolution: string;
     category: string;
     decimals: number;
+    nextTask?: string; //For når man har å gjøre med deloppgaver. Bør være en OID eller en ITask. Som et child eller et parent
+    prevTask?: string;
 }
 
 export interface VariableDomain {

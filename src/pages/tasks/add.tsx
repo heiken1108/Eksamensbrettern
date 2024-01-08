@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ITask, Variable, VariableTypes } from "../../data/types";
 import categories from "../../data/categories";
 import { useRouter } from "next/router";
+import { MathJax } from "better-react-mathjax";
+import { addMathJax } from "../../lib/taskHandling";
+import { createTask } from "../../lib/api";
 
 export default function AddTask() {
     const router = useRouter();
@@ -9,7 +12,7 @@ export default function AddTask() {
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [ordinaryVersion, setOrdinaryVersion] = useState<string>("");
-    const [textualVersion, setTextualVersion] = useState<string>("");
+    const [LaTeXVersion, setLaTeXVersion] = useState<string>("");
     const [variables, setVariables] = useState<Variable[]>([]);
     const [newVariable, setNewVariable] = useState<string>("");
     const [solutionSteps, setSolutionSteps] = useState<string[]>([]);
@@ -27,7 +30,6 @@ export default function AddTask() {
             description: description,
             approved: false,
             ordinaryVersion: ordinaryVersion,
-            textualVersion: textualVersion,
             solutionSteps: solutionSteps,
             variables: variables,
             example: example,
@@ -43,7 +45,7 @@ export default function AddTask() {
             },
             body: JSON.stringify(task)
         });
-        router.push(".")
+        router.push(".");
     }
 
     const handleAddStep = () => {
@@ -86,7 +88,7 @@ export default function AddTask() {
 
     const handleChangeStepsize = (value: string, index: number) => {
         const newVariables = [...variables];
-        newVariables[index].domain.stepSize = Number(value);
+        newVariables[index].domain.stepSize = parseFloat(value);
         setVariables(newVariables);
     }
 
@@ -101,6 +103,11 @@ export default function AddTask() {
         newVariables[index].domain.values = values.split(",").map(value => Number(value));
         setVariables(newVariables);
     }
+
+    useEffect(() => {
+        const newLaTeXVersion = addMathJax(ordinaryVersion);
+        setLaTeXVersion(newLaTeXVersion);
+    }, [ordinaryVersion]);
 
     return (
         <div className="min-h-screen flex items-center justify-center">
@@ -149,26 +156,20 @@ export default function AddTask() {
             ))}
             </select>
             </div>
+            <div className="mb-4">
+                <MathJax>
+                    <p className="text-gray-600 mb-4">Preview: {LaTeXVersion}</p> {/*Er en bug her med at preview slutter når man lager et LaTeX-objekt*/}
+                </MathJax>
+            </div>
             <label className="mb-4" htmlFor="ordinaryVersion">
-                Ordinary version (& for equation, $ for LaTeX):
+                Task (& for equation, $ for LaTeX):
                 <textarea
                     className="border p-2 w-full"
                     name="ordinaryVersion"
                     id="ordinaryVersion"
-                    placeholder="E.g. Solve the equation $&x^2 + 2x + 1 = 0&$ where $x=x$"
+                    placeholder="E.g. Solve the equation $&x^2 + 2x + 1 = 0&$ where $x=x&$&"
                     required
                     onChange={(e) => setOrdinaryVersion(e.target.value)}
-                />
-            </label>
-            <label className="mb-4" htmlFor="textualVersion">
-                Textual version:
-                <input
-                    className="border p-2 w-full"
-                    type="text"
-                    name="textualVersion"
-                    id="textualVersion"
-                    required
-                    onChange={(e) => setTextualVersion(e.target.value)}
                 />
             </label>
             <label className="mb-4" htmlFor="variables">
@@ -208,7 +209,7 @@ export default function AddTask() {
                                 </option>
                             ))}
                         </select>
-                        {variables[index].type === "Integer" && (
+                        {(variables[index].type === "Integer" || variables[index].type === "Semicontinuous" || variables[index].type === "Continuous" ) && (
                             <>  
                                 Min:
                                 <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Minimum value" onChange={(e) => handleChangeMin(e.target.value, index)}/>
@@ -219,10 +220,6 @@ export default function AddTask() {
 
                         {variables[index].type === "Semicontinuous" && (
                             <>
-                                Min:
-                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Minimum value" onChange={(e) => handleChangeMin(e.target.value, index)}/>
-                                Max:
-                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum value" onChange={(e) => handleChangeMax(e.target.value, index)}/>
                                 Stepsize:
                                 <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Stepsize" onChange={(e) => handleChangeStepsize(e.target.value, index)}/>
                             </>
@@ -230,10 +227,6 @@ export default function AddTask() {
 
                         {variables[index].type === "Continuous" && (
                             <>
-                                Min:
-                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Minimum value" onChange={(e) => handleChangeMin(e.target.value, index)}/>
-                                Max:
-                                <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum value" onChange={(e) => handleChangeMax(e.target.value, index)}/>
                                 Max decimals:
                                 <input required className="flex-1 border p-2 rounded-md" type="text" placeholder="Maximum decimals" onChange={(e) => handleChangeMaxDecimals(e.target.value, index)}/>
                             </>
@@ -262,7 +255,7 @@ export default function AddTask() {
                     ))}
                 </div>
             </label>
-            <label className="mb-4" htmlFor="solutionSteps">
+            <label className="mb-4" htmlFor="solutionSteps"> {/*Må legge til sjekk at det ikke er tomt */}
                 Solution Steps:
                 <div className="flex items-center space-x-2">
                     <input
