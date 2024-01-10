@@ -1,12 +1,24 @@
-import { getTaskById } from "../../lib/api";
-import type { InferGetServerSidePropsType } from 'next'
-import { useState } from "react";
+import type { NextPage } from 'next'
+import { useMemo, useState } from "react";
 import { createTaskVariant } from "../../lib/taskHandling";
-import { abs, evaluate, parse, pi } from "mathjs";
 import { MathJax } from "better-react-mathjax";
+import { GET_TASK_BY_ID } from "../../graphql/queries";
+import { useQuery } from "@apollo/client";
+import { useRouter } from "next/router";
+
+const Task: NextPage = () => {
+    const router = useRouter();
+    const { id } = router.query;
+    const {data, loading, error} = useQuery(GET_TASK_BY_ID, {
+        variables: { id: id}
+    });
+    
+
+    const variant = useMemo(() => {
+        return data ? createTaskVariant(data.getTaskByID) : { variant: "", solution: "" };
+    }, [data]);
 
 
-export default function Task({ task, variant }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [userAnswer, setUserAnswer] = useState<string>("");
     const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
 
@@ -14,17 +26,22 @@ export default function Task({ task, variant }: InferGetServerSidePropsType<type
         const isCorrect = userAnswer.trim().toLowerCase() === variant.solution.trim().toLowerCase();
         setIsAnswerCorrect(isCorrect);
     };
+
+    
     
     return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="flex-grow flex items-center justify-center">
+                {loading && <p>Loading...</p>}
+                {error && <p>Error: {error.message}</p>}
+                {data && (
                 <div className="max-w-md w-full p-6 bg-white rounded-md shadow-md">
-                    <h1 className="text-2xl font-bold mb-4">{task.title}</h1>
+                    <h1 className="text-2xl font-bold mb-4">{data.getTaskByID.title}</h1>
                     <MathJax>
                         <p className="text-gray-600 mb-4">{variant.variant}</p>
                     </MathJax>
-                    <p className="text-gray-700 mb-4">Category: {task.category}</p>
-                    <p className="text-gray-700 mb-4">Bruk maksimalt {task.decimals} desimaler i svaret</p>
+                    <p className="text-gray-700 mb-4">Category: {data.getTaskByID.category}</p>
+                    <p className="text-gray-700 mb-4">Bruk maksimalt {data.getTaskByID.decimals} desimaler i svaret</p>
 
                     <label className="block mb-4">
                         Your Answer:
@@ -50,12 +67,15 @@ export default function Task({ task, variant }: InferGetServerSidePropsType<type
                         </p>
                     )}
                 </div>
+                )}
             </div>
         </div>
     );
 }
 
-export async function getServerSideProps(context: any) {
+export default Task;
+
+/*export async function getServerSideProps(context: any) {
     const { id } = context.query;
 
     const task = await getTaskById(id);
@@ -68,4 +88,4 @@ export async function getServerSideProps(context: any) {
             variant
         }
     }
-}
+}*/

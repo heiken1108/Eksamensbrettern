@@ -3,6 +3,7 @@ import { ITask } from "../../data/types";
 import categories from "../../data/categories";
 import { MathJax } from "better-react-mathjax";
 import { addMathJax, createTaskVariant } from "../../lib/taskHandling";
+import { useMemo } from "react";
 
 export default function TaskCard({task}: {task: ITask}) {
     const router = useRouter();
@@ -13,6 +14,7 @@ export default function TaskCard({task}: {task: ITask}) {
     }
 
     const getCategoryBackgroundColor = (categoryName: string) => {
+        console.log("Category: ", categoryName)
         const category = categories.find(cat => cat.name === categoryName);
         return category ? category.backgroundColor : "#FFFFFF"; // Default to white if category not found
     }
@@ -21,7 +23,11 @@ export default function TaskCard({task}: {task: ITask}) {
         backgroundColor: getCategoryBackgroundColor(task.category),
     };
 
-    const variant = createTaskVariant(task);
+    //const variant = createTaskVariant(task);
+
+    const variant = useMemo(() => {
+        return createTaskVariant(task)
+    }, []);
     
 
     return (

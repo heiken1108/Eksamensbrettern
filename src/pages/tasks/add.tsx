@@ -4,10 +4,12 @@ import categories from "../../data/categories";
 import { useRouter } from "next/router";
 import { MathJax } from "better-react-mathjax";
 import { addMathJax } from "../../lib/taskHandling";
-import { createTask } from "../../lib/api";
+import { CREATE_TASK } from "../../graphql/queries";
+import { useMutation } from "@apollo/client";
 
 export default function AddTask() {
     const router = useRouter();
+    const [createTaskMutation] = useMutation(CREATE_TASK);
 
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
@@ -22,9 +24,17 @@ export default function AddTask() {
     const [category, setCategory] = useState<string>("");
     const [decimals, setDecimals] = useState<number>(0);
 
+    const createTask = async (taskData: ITask) => {
+        await createTaskMutation({
+            variables: {
+                input: taskData,
+            },
+        });
+        alert("Submitted: " + taskData.title);
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        alert("Submitted: " + title);
         const task: ITask = {
             title: title,
             description: description,
@@ -37,14 +47,7 @@ export default function AddTask() {
             category: category,
             decimals: decimals,
         }
-        //await createTask(task);
-        const res = await fetch("/api/tasks", { //Denne må være her av en eller annen grunn, sier den ikke finner dns-module...
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(task)
-        });
+        await createTask(task);
         router.push(".");
     }
 

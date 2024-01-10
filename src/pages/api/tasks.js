@@ -27,6 +27,6 @@ export default async function handler(req, res) {
     async function postTask() {
         const newTask = req.body;
         await db.collection("tasks").insertOne(newTask);
-        res.status(201).send();
+        res.json(newTask);
     }
 }

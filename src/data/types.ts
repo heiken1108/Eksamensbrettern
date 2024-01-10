@@ -3,11 +3,9 @@ export interface ITask {
     title: string;
     description: string;
     approved: boolean;
-    latexVersion?: string;
     ordinaryVersion: string;
     solutionSteps: string[];
     variables: Variable[];
-    operators?: string[]; //Dårlig at den bare er ?, men blir sånn nå ass
     example: string;
     exampleSolution: string;
     category: string;

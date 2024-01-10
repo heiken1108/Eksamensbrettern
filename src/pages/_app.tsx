@@ -3,13 +3,18 @@ import { MathJaxContext } from "better-react-mathjax"; // Replace "your-mathjax-
 import "../styles/globals.css";
 import { AppProps } from "next/app";
 
+import { ApolloProvider } from '@apollo/client'
+
+import client from "../graphql/apollo-client"
 
 function MyApp({ Component, pageProps }: AppProps) {
     return (
-    <MathJaxContext>
-        <Navbar />
-        <Component {...pageProps} />
-    </MathJaxContext>
+    <ApolloProvider client={client}>
+        <MathJaxContext>
+            <Navbar />
+            <Component {...pageProps} />
+        </MathJaxContext>
+    </ApolloProvider>
 );
 }
 

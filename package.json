@@ -6,10 +6,18 @@
     "start": "next start"
   },
   "dependencies": {
+    "@apollo/client": "^3.8.8",
+    "@apollo/server": "^4.10.0",
+    "@as-integrations/next": "^3.0.0",
+    "@nextui-org/react": "^2.2.9",
+    "apollo-server-core": "^3.13.0",
     "better-react-mathjax": "^2.0.3",
+    "graphql": "^16.8.1",
+    "graphql-tag": "^2.12.6",
     "mathjs": "^12.2.1",
     "mathjs-simple-integral": "^0.1.1",
     "mongodb": "^4.8.1",
+    "mongoose": "^8.0.3",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

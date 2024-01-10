@@ -1,31 +1,30 @@
-import type { InferGetServerSidePropsType } from 'next';
+import type { InferGetServerSidePropsType, NextPage } from 'next';
 import { ITask } from '../data/types';
 import TaskCard from '../components/TaskCard/TaskCard';
 import { useRouter } from 'next/router';
 import { getAllTasks } from '../lib/api';
 import categories from '../data/categories';
 import { useEffect, useState } from 'react';
+import { useQuery } from "@apollo/client";
+import { GET_ALL_TASKS } from '../graphql/queries';
+
 
 export async function getServerSideProps() {
   const tasks: ITask[] = await getAllTasks();
+  //const tasks: ITask[] = [];
   return { props: { tasks }};
 }
 
-export default function Home({ tasks }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+//export default function Home({ tasks }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+const Tasks: NextPage = () => {
   const router = useRouter();
+  const { 
+    data: dataTasks, 
+    loading: dataLoading, 
+    error: dataError 
+  } = useQuery(GET_ALL_TASKS);
+  
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [categoryTasks, setCategoryTasks] = useState<ITask[]>(tasks);
-
-  useEffect(() => {
-    if (selectedCategory !== "") {
-      const filteredTasks: ITask[] = [];
-      //const hei = getTasksByCategory(selectedCategory);
-      //console.log(hei);
-      setCategoryTasks(filteredTasks);
-    } else {
-      setCategoryTasks(tasks);
-    }
-  }, [selectedCategory, tasks]);
 
   const handleCategoryClick = (categoryName: string) => {
     selectedCategory === "" ? setSelectedCategory(categoryName) : setSelectedCategory(""); //Kan settes direkte inn i objektet
@@ -61,10 +60,18 @@ export default function Home({ tasks }: InferGetServerSidePropsType<typeof getSe
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3">
-        {tasks.map((task: ITask) => (
+        {dataLoading && (
+          <p>Laster...</p>
+        )}
+        {dataError && (
+          <p>Error</p>
+        )}
+        {dataTasks && dataTasks.getTasks.map((task: ITask) => (
           <TaskCard key={task._id} task={task} />
         ))}
       </div>
     </div>
   );
 }
+
+export default Tasks
