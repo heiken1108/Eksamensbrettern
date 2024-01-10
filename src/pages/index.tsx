@@ -1,15 +1,9 @@
 import { useRouter } from "next/router";
 import { NextPage } from "next";
-import { MathJax } from "better-react-mathjax";
 
-import { GET_ALL_TASKS, HELLO } from "../graphql/queries";
-import { useQuery } from "@apollo/client";
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const { data, loading, error } = useQuery(GET_ALL_TASKS);
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error.message}</p>;
   
   return (
     <>
@@ -24,7 +18,6 @@ const Home: NextPage = () => {
     <div id="topPicksDiv" className="flex justify-start flex-col">
       <h2 className="text-3xl p-5">Top picks</h2>
       <div className="grid grid-cols-3 gap-3 p-3">
-        <p>{data.getTasks[0].title}</p>
       </div>
     </div>
     </>
