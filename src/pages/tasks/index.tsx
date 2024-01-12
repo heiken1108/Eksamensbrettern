@@ -46,8 +46,8 @@ const Tasks: NextPage = () => {
               key={category.name}
               className={`${
                 selectedCategory === category.name
-                  ? "bg-slate-600"
-                  : "bg-red-900"
+                  ? "bg-blue-800 text-white"
+                  : "bg-white"
               } 
             flex items-center space-x-1 border-black border p-2 rounded-full cursor-pointer select-none`}
               onClick={() => handleCategoryClick(category.name)}
